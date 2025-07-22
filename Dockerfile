@@ -1,14 +1,12 @@
-# Usando uma imagem do JDK 17 como base
-FROM eclipse-temurin:17-jdk
-
-# Define o diretório de trabalho dentro do container
+# Etapa de build com Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copia o arquivo JAR para dentro do container
-COPY target/order-system-0.0.1-SNAPSHOT.jar app.jar
-
-# Expõe a porta que sua aplicação usa
+# Etapa final
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Comando para rodar a aplicação
 CMD ["java", "-jar", "app.jar"]
